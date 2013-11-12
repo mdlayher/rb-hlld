@@ -59,9 +59,30 @@ class HlldClient
 		send(buffer) == HLLD_DONE
 	end
 
+	# Close an in-memory HLL set on server
+	def close(name)
+		send("close " + name) == HLLD_DONE
+	end
+
+	# Clear an in-memory HLL set on server
+	# NOTE: Should only be called after filter is closed
+	def clear(name)
+		send("clear " + name) == HLLD_DONE
+	end
+
 	# Drop a HLL set on server
 	def drop(name)
 		send("drop " + name) == HLLD_DONE
+	end
+
+	# Flush data from a HLL set on server
+	def flush(name)
+		send("flush " + name) == HLLD_DONE
+	end
+
+	# DANGER: Flush data from ALL HLL sets on server
+	def flush_all()
+		send("flush") == HLLD_DONE
 	end
 
 	private
