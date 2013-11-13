@@ -105,7 +105,7 @@ class HlldClient
 		# Parse through multi line response
 		res.split("\n").each do |line|
 			# Convert status into hash by combining arrays
-			keys = ["name", "variance", "precision", "size", "items"]
+			keys = [:name, :variance, :precision, :size, :items]
 			list << Hash[keys.zip(line.split(' '))]
 		end
 
@@ -122,7 +122,7 @@ class HlldClient
 		send_msg("info " + name).split("\n").each do |line|
 			# Split into key/value pairs
 			pair = line.split(' ', 2)
-			hash[pair[0]] = pair[1]
+			hash[pair[0].to_sym()] = pair[1]
 		end
 
 		# Return hash
@@ -138,12 +138,12 @@ class HlldClient
 	# Set multiple items in HLL set on server
 	def bulk(name, items)
 		raise "Argument Error: items must be an array" unless items.kind_of? Array
-		send_msg(sprintf("bulk %s %s", name, items.join(' '))) == HLLD_DONE
+		send_msg(sprintf("bulk %s %s", name, items.map { |i| Digest::SHA1.hexdigest(i) }.join(' '))) == HLLD_DONE
 	end
 
 	# Retrieve the approximate count of items in a given HLL set
 	def count(name)
-		info(name)['size']
+		info(name)[:size]
 	end
 
 	private
