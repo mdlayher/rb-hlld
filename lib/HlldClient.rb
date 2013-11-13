@@ -132,13 +132,13 @@ class HlldClient
 	# Set an item in a specified HLL set
 	# NOTE: value is hashed in order to make long keys a uniform length
 	def set(name, value)
-		send_msg(sprintf("set %s %s", name, Digest::SHA1.hexdigest(value))) == HLLD_DONE
+		send_msg(sprintf("set %s %s", name, Digest::SHA1.hexdigest(value.to_s()))) == HLLD_DONE
 	end
 
 	# Set multiple items in HLL set on server
 	def bulk(name, items)
 		raise "Argument Error: items must be an array" unless items.kind_of? Array
-		send_msg(sprintf("bulk %s %s", name, items.map { |i| Digest::SHA1.hexdigest(i) }.join(' '))) == HLLD_DONE
+		send_msg(sprintf("bulk %s %s", name, items.map { |i| Digest::SHA1.hexdigest(i.to_s()) }.join(' '))) == HLLD_DONE
 	end
 
 	# Retrieve the approximate count of items in a given HLL set
