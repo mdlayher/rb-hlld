@@ -30,17 +30,18 @@ set = hlld.get("ruby")
 
 # Add some numbers into set
 (1..500).each do |n|
-	hlld.set("ruby", n.to_s())
+	hlld.set("ruby", n)
 end
 
 # Add some numbers into set using HllSet interface
 # Either method may be used for all functions which accept a set name as first parameter
 (501..1000).each do |n|
-	set.set(n.to_s())
+	set.set(n)
 end
 
 # Bulk add an array of values into set
 set.bulk(["foo", "bar", "baz"])
+set.bulk((1001..5000).to_a())
 
 # Check the approximate cardinality of set
 printf("%s: ~%d\n", set.name(), set.count())
