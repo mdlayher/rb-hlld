@@ -59,7 +59,12 @@ class HlldClient
 		end
 
 		# Send create set request to server, verify done
-		send(buffer) == HLLD_DONE
+		if send(buffer) == HLLD_DONE
+			return HllSet.new(name, self)
+		end
+
+		# Return false if failed to create set
+		false
 	end
 
 	# Close an in-memory HLL set on server
@@ -160,5 +165,16 @@ class HlldClient
 
 		# Return reply
 		res
+	end
+end
+
+class HllSet
+	def initialize(name, hlld_client)
+		@name = name
+		@hlld_client = hlld_client
+	end
+
+	def info()
+		@hlld_client.info(@name)
 	end
 end
