@@ -78,25 +78,24 @@ class HlldClient
 		send("drop " + name) == HLLD_DONE
 	end
 
-	# Flush data from a HLL set on server
+	# Flush data to disk from a HLL set on server
 	def flush(name)
 		send("flush " + name) == HLLD_DONE
 	end
 
-	# DANGER: Flush data from ALL HLL sets on server
-	def flush_all()
-		send("flush") == HLLD_DONE
-	end
-
 	# Retrieve a list of HLL sets and their status by matching name, or all filters if none provided
 	def list(name = nil)
-		res = send("list " + name)
+		unless name.nil?
+			res = send("list " + name)
+		else
+			res = send("list")
+		end
 
 		# Build response array
 		list = []
 
 		# Parse through multi line response
-		res.split('\n').each do |line|
+		res.split("\n").each do |line|
 			# Convert status into hash by combining arrays
 			keys = ["name", "variance", "precision", "size", "items"]
 			list << Hash[keys.zip(line.split(' '))]
@@ -134,7 +133,7 @@ class HlldClient
 		if res == HLLD_LIST_START
 			res = ""
 			while (line = @socket.gets().chomp()) != HLLD_LIST_END
-				res += line
+				res += line + "\n"
 			end
 		end
 
