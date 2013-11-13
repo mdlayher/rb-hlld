@@ -1,8 +1,11 @@
 require 'socket'
+require 'digest/sha1'
 
 class HlldClient
 	# Constants for string responses from hlld
 	HLLD_DONE = "Done"
+	HLLD_LIST_START = "START"
+	HLLD_LIST_END = "END"
 
 	# Initializer, set host and port
 	def initialize(host, port = 4553)
@@ -85,6 +88,36 @@ class HlldClient
 		send("flush") == HLLD_DONE
 	end
 
+	# Retrieve a list of HLL sets and their status by matching name, or all filters if none provided
+	def list(name = nil)
+		res = send("list " + name)
+
+		# Build response array
+		list = []
+
+		# Parse through multi line response
+		res.split('\n').each do |line|
+			# Convert status into hash by combining arrays
+			keys = ["name", "variance", "precision", "size", "items"]
+			list << Hash[keys.zip(line.split(' '))]
+		end
+
+		# Return list
+		list
+	end
+
+	# Set an item in a specified HLL set
+	# NOTE: value is hashed in order to make long keys a uniform length
+	def set(hll, value)
+		send(sprintf("set %s %s", hll, Digest::SHA1.hexdigest(value))) == HLLD_DONE
+	end
+
+	# Set multiple items in HLL set on server
+	def bulk(hll, items)
+		raise "Argument Error: items must be an array" unless items.kind_of? Array
+		send(sprintf("bulk %s %s", hll, items.join(' '))) == HLLD_DONE
+	end
+
 	private
 
 	# Send a message to server on socket
@@ -95,6 +128,17 @@ class HlldClient
 
 		# Write message, read reply
 		@socket.puts(input + "\n")
-		response = @socket.gets.chomp()
+		res = @socket.gets().chomp()
+
+		# If reply indicates start of a list, fetch the rest
+		if res == HLLD_LIST_START
+			res = ""
+			while (line = @socket.gets().chomp()) != HLLD_LIST_END
+				res += line
+			end
+		end
+
+		# Return reply
+		res
 	end
 end
