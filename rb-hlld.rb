@@ -105,6 +105,22 @@ class HlldClient
 		list
 	end
 
+	# Retrieve detailed information about HLL set with specified name
+	def info(name)
+		# Build response hash
+		hash = {}
+
+		# Iterate multi-line response
+		send("info " + name).split("\n").each do |line|
+			# Split into key/value pairs
+			pair = line.split(' ', 2)
+			hash[pair[0]] = pair[1]
+		end
+
+		# Return hash
+		hash
+	end
+
 	# Set an item in a specified HLL set
 	# NOTE: value is hashed in order to make long keys a uniform length
 	def set(hll, value)
@@ -115,6 +131,11 @@ class HlldClient
 	def bulk(hll, items)
 		raise "Argument Error: items must be an array" unless items.kind_of? Array
 		send(sprintf("bulk %s %s", hll, items.join(' '))) == HLLD_DONE
+	end
+
+	# Retrieve the approximate count of items in a given HLL set
+	def count(name)
+		info(name)['size']
 	end
 
 	private
