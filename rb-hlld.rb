@@ -35,7 +35,7 @@ class HlldClient
 		if @connected
 			@socket.close()
 
-			@connect = false
+			@connected = false
 			return true
 		end
 
