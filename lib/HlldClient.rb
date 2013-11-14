@@ -17,7 +17,7 @@ class HlldClient
 	end
 
 	# Initiate a connection to hlld server
-	def connect()
+	def connect
 		if @connected
 			return false
 		end
@@ -33,10 +33,10 @@ class HlldClient
 	end
 
 	# Close a connection to hlld server
-	def disconnect()
+	def disconnect
 		# Verify socket is actually open
 		if @connected
-			@socket.close()
+			@socket.close
 
 			@connected = false
 			return true
@@ -96,7 +96,7 @@ class HlldClient
 		unless name.nil?
 			res = send_msg("list " + name)
 		else
-			res = send_msg("list")
+			res = send_msg "list"
 		end
 
 		# Build response array
@@ -122,7 +122,7 @@ class HlldClient
 		send_msg("info " + name).split("\n").each do |line|
 			# Split into key/value pairs
 			pair = line.split(' ', 2)
-			hash[pair[0].to_sym()] = pair[1]
+			hash[pair[0].to_sym] = pair[1]
 		end
 
 		# Return hash
@@ -132,13 +132,13 @@ class HlldClient
 	# Set an item in a specified HLL set
 	# NOTE: value is hashed in order to make long keys a uniform length
 	def set(name, value)
-		send_msg(sprintf("set %s %s", name, Digest::SHA1.hexdigest(value.to_s()))) == HLLD_DONE
+		send_msg(sprintf("set %s %s", name, Digest::SHA1.hexdigest(value.to_s))) == HLLD_DONE
 	end
 
 	# Set multiple items in HLL set on server
 	def bulk(name, items)
 		raise "Argument Error: items must be an array" unless items.kind_of? Array
-		send_msg(sprintf("bulk %s %s", name, items.map { |i| Digest::SHA1.hexdigest(i.to_s()) }.join(' '))) == HLLD_DONE
+		send_msg(sprintf("bulk %s %s", name, items.map { |i| Digest::SHA1.hexdigest(i.to_s) }.join(' '))) == HLLD_DONE
 	end
 
 	# Retrieve the approximate count of items in a given HLL set
@@ -156,7 +156,7 @@ class HlldClient
 
 		# Write message, read reply
 		@socket.puts(input + "\n")
-		res = @socket.gets().chomp()
+		res = @socket.gets.chomp
 
 		# If reply indicates invalid set, return empty string
 		if res == HLLD_SET_NO_EXIST
@@ -166,7 +166,7 @@ class HlldClient
 		# If reply indicates start of a list, fetch the rest
 		if res == HLLD_LIST_START
 			res = ""
-			while (line = @socket.gets().chomp()) != HLLD_LIST_END
+			while (line = @socket.gets.chomp) != HLLD_LIST_END
 				res += line + "\n"
 			end
 		end
