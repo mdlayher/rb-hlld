@@ -93,10 +93,10 @@ class HlldClient
 
 	# Retrieve a list of HLL sets and their status by matching name, or all filters if none provided
 	def list(name = nil)
-		unless name.nil?
-			res = send_msg("list " + name)
-		else
+		if name.nil?
 			res = send_msg "list"
+		else
+			res = send_msg("list " + name)
 		end
 
 		# Build response array
