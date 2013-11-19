@@ -16,35 +16,6 @@ class HlldClient
 		@port = port
 	end
 
-	# Initiate a connection to hlld server
-	def connect
-		if @connected
-			return false
-		end
-
-		# Create a TCP socket connection
-		begin
-			@socket = TCPSocket.open(@host, @port)
-		rescue
-			return false
-		end
-
-		@connected = true
-	end
-
-	# Close a connection to hlld server
-	def disconnect
-		# Verify socket is actually open
-		if @connected
-			@socket.close
-
-			@connected = false
-			return true
-		end
-
-		return false
-	end
-
 	# Retrieve an object representing the named set
 	def get(name)
 		HllSet.new(name, self)
@@ -148,15 +119,30 @@ class HlldClient
 
 	private
 
-	# Send a message to server on socket
-	def send_msg(input)
-		if !@connected || @socket.nil?
-			raise "Error: client is not connected to hlld server!"
+	# Establish or re-use socket connection
+	def connect
+		# Return existing socket
+		return @socket unless @socket.nil?
+
+		# Create a TCP socket connection
+		begin
+			@socket = TCPSocket.open(@host, @port)
+		rescue
+			raise "Error: failed to connect to bloomd: #{@host}:#{@port}"
 		end
 
+		# Return socket instance
+		@socket
+	end
+
+	# Send a message to server on socket
+	def send_msg(input)
+		# Lazy load or retrieve socket instance
+		socket = connect
+
 		# Write message, read reply
-		@socket.puts(input + "\n")
-		res = @socket.gets.chomp
+		socket.puts(input + "\n")
+		res = socket.gets.chomp
 
 		# If reply indicates invalid set, return empty string
 		if res == HLLD_SET_NO_EXIST
@@ -166,7 +152,7 @@ class HlldClient
 		# If reply indicates start of a list, fetch the rest
 		if res == HLLD_LIST_START
 			res = ""
-			while (line = @socket.gets.chomp) != HLLD_LIST_END
+			while (line = socket.gets.chomp) != HLLD_LIST_END
 				res += line + "\n"
 			end
 		end
