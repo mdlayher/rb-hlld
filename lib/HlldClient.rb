@@ -11,8 +11,12 @@ class HlldClient
 	HLLD_SET_NO_EXIST = "Set does not exist"
 
 	# Initializer, set host and port
-	def initialize(host, port = 4553)
+	def initialize(host = "localhost", port = 4553)
 		@host = host
+
+		unless port.is_a? Integer and port > 0 and port < 65536
+			raise "Error: port must be a valid integer between 1 and 65535"
+		end
 		@port = port
 	end
 
