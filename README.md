@@ -13,7 +13,7 @@ All commands accepted by hlld are implemented in rb-hlld.  Here is a basic examp
 require_relative 'lib/HlldClient.rb'
 
 # Establish a connection to a local hlld with client
-hlld = HlldClient.new("localhost", 4553)
+hlld = HlldClient.new
 
 # Create a HyperLogLog set
 unless hlld.create "ruby"
@@ -22,7 +22,7 @@ unless hlld.create "ruby"
 end
 
 # Create a set object to use more concise, object-oriented interface
-set = hlld.get "ruby"
+hll = hlld.get "ruby"
 
 # Add some numbers into set
 (1..500).each do |n|
@@ -32,16 +32,16 @@ end
 # Add some numbers into set using HllSet interface
 # Either method may be used for all functions which accept a set name as first parameter
 (501..1000).each do |n|
-	set.set n
+	hll.set n
 end
 
 # Bulk add an array of values into set
-set.bulk(["foo", "bar", "baz"])
-set.bulk((1001..5000).to_a)
+hll.bulk(["foo", "bar", "baz"])
+hll.bulk((1001..5000).to_a)
 
 # Check the approximate cardinality of set
-printf("%s: ~%d\n", set.name, set.count)
+printf("%s: ~%d\n", hll.name, hll.count)
 
 # Drop set, disconnect
-set.drop
+hll.drop
 ```
