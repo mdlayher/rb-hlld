@@ -1,15 +1,10 @@
 class HllSet
-	attr_reader name
+	attr_reader :name
 
 	# Initialize with name and an instance of HlldClient
 	def initialize(name, client)
 		@name = name
 		@client = client
-	end
-
-	# Allow name to be accessed read-only
-	def name()
-		@name
 	end
 
 	# Delegate undefined methods to HlldClient, passing name as first parameter
